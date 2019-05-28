@@ -1,0 +1,67 @@
+{
+  "name": "chat2-react",
+  "version": "0.1.0",
+  "description": "Chat application with a Express.js and SSR (Server-Side React) backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from my 'nodejs-chat' app",
+  "keywords": [
+    "real-time",
+    "chat",
+    "Node.js",
+    "Express.js",
+    "SSR",
+    "Server-side React",
+    "Socket.io",
+    "React.js",
+    "MongoDB",
+    "Webpack"
+  ],
+  "license": "ISC",
+  "author": "Mikael Wallin <wallindev@gmail.com> (http://wallindev.se)",
+  "main": "./server/index.js",
+  "browser": "./client/index.js",
+  "repository": "bitbucket:wallindev/chat2-react",
+  "scripts": {
+    "start": "NODE_ENV=development && nodemon",
+    "start-dev": "NODE_ENV=development && nodemon",
+    "start-test": "NODE_ENV=test && mocha",
+    "test": "NODE_ENV=test && mocha",
+    "start-prod": "NODE_ENV=production && webpack && node"
+  },
+  "dependencies": {
+    "colors": "^1.3.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.11",
+    "mongodb": "^2.2.36",
+    "mongoose": "^5.4.14",
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2",
+    "react-router-dom": "^4.3.1",
+    "serialize-javascript": "^1.6.1",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.3.3",
+    "babel-loader": "^8.0.5",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "nodemon": "^1.18.10",
+    "stylus": "^0.54.5",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "engines": {
+    "node": ">=10.15.1 <11.10.0"
+  },
+  "babel": {
+    "presets": [
+      "env",
+      "react"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
+    ]
+  }
+}
