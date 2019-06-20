@@ -1,30 +1,77 @@
 # chat2-react
 
-Second overhaul and almost complete rewrite of the Node.js Real-time Chat app (formerly 'nodejs-chat').
+Second version and almost complete rewrite of the Node.js Real-time Chat app (formerly 'nodejs-chat').
 
-Chat application with a Express.js and SSR (Server-Side React) backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from my 'nodejs-chat' app
+Chat application with Express.js backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from the original 'nodejs-chat' app
 
 ## Installation
 
 Download node at [nodejs.org](http://nodejs.org) and install it, if you haven't already.
 
+Clone repository and install npm modules
 ```sh
 git clone https://github.com/wallindev/chat2-react.git
 cd chat2-react
 npm install
+```
+
+For running production mode
+```sh
+npm run build
 npm start
 ```
 
+For running development mode and live code
+```sh
+npm run start:dev
+```
+*`Note: This uses the Express middleware version ("webpack-dev-middleware") of Webpack's dev server that runs in, and writes bundles to, memory (configurable) and not webpack-dev-server`*
+
 ## Dependencies
 
-- [express](https://github.com/strongloop/express): Fast, unopinionated, minimalist web framework
-- [hjs](https://github.com/nullfirm/hjs): Hogan.js NPM package for express 3.x
-- [mongodb](https://github.com/mongodb/node-mongodb-native): A node.js driver for MongoDB
-- [socket.io](https://github.com/Automattic/socket.io): node.js realtime framework server
+- [colors](https://ghub.io/colors): get colors in your node.js console
+- [cors](https://ghub.io/cors): Node.js CORS middleware
+- [express](https://ghub.io/express): Fast, unopinionated, minimalist web framework
+- [mongodb](https://ghub.io/mongodb): The official MongoDB driver for Node.js
+- [react](https://ghub.io/react): React is a JavaScript library for building user interfaces.
+- [react-dom](https://ghub.io/react-dom): React package for working with the DOM.
+- [socket.io](https://ghub.io/socket.io): node.js realtime framework server
 
 ## Dev Dependencies
 
-- [bower](https://github.com/bower/bower): A package manager for the web
+- [@babel/core](https://ghub.io/@babel/core): Babel compiler core.
+- [@babel/preset-env](https://ghub.io/@babel/preset-env): A Babel preset for each environment.
+- [@babel/preset-react](https://ghub.io/@babel/preset-react): Babel preset for all React plugins.
+- [@babel/register](https://ghub.io/@babel/register): babel require hook
+- [babel-loader](https://ghub.io/babel-loader): babel module loader for webpack
+- [cross-env](https://ghub.io/cross-env): Run scripts that set and use environment variables across platforms
+- [css-loader](https://ghub.io/css-loader): css loader module for webpack
+- [nodemon](https://ghub.io/nodemon): Simple monitor script for use during development of a node.js app.
+- [open](https://ghub.io/open): Open stuff like URLs, files, executables. Cross-platform.
+- [shelljs](https://ghub.io/shelljs): Portable Unix shell commands for Node.js
+- [style-loader](https://ghub.io/style-loader): style loader module for webpack
+- [webpack](https://ghub.io/webpack): Packs CommonJs/AMD modules for the browser. Allows to split your codebase into multiple bundles, which can be loaded on demand. Support loaders to preprocess files, i.e. json, jsx, es7, css, less, ... and your custom stuff.
+- [webpack-cli](https://ghub.io/webpack-cli): CLI for webpack &amp; friends
+- [webpack-dev-middleware](https://ghub.io/webpack-dev-middleware): A development middleware for webpack
+- [webpack-hot-middleware](https://ghub.io/webpack-hot-middleware): Webpack hot reloading you can attach to your own server
+- [webpack-node-externals](https://ghub.io/webpack-node-externals): Easily exclude node_modules in Webpack bundle
+
+## Prerequisites
+
+MongoDB Database installed with default settings (host: localhost, port=27017, dbpath=/data/db). Mongod engine/service version 3.2.
+
+## Issues
+
+Webpack has a default setting to mock certain Node.js globals when compiling the server bundle, for example '__dirname' and '__filename'. For this to work correctly the following option needs to be set in the webpack config file.
+
+```js
+  node: {
+    __dirname: true,
+    __filename: true
+  }
+```
+
+More info in the [webpack documentation](https://webpack.js.org/configuration/node#node__filename).
 
 ## License
 
