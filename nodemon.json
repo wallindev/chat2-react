@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "src/client/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "watch": [
+    "src/server/**/*"
+  ],
+  "ext": "js,json"
+}
