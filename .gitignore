@@ -1,18 +1,18 @@
 # Dependency directories
 node_modules/
 
+# Transpiled Javascript code
+dist/**/*.js
+
+# For managing opening browser window from app in DEV mode
+APP_OPENED_IN_BROWSER
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
