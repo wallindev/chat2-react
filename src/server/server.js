@@ -12,29 +12,6 @@ import webpackConfig from '../../webpack.config.babel';
 
 const compiler = webpack(webpackConfig);
 
-/* // Use of callback triggers ConcurrentCompilationError because of webpack-dev-middleware in DEV mode
-const compiler = conf.DEVMODE ? webpack(webpackConfig) : webpack(webpackConfig, (err, compiledData) => {
-  if (err || compiledData.hasErrors()) {
-    console.error(err);
-  }
-
-  // func.l('compiledData:', compiledData);
-  func.l('compiledData.hash:', compiledData.hash);
-
-  const compiledDataClient = compiledData.stats[0];
-  func.l('compiledDataClient.hash:', compiledDataClient.hash);
-  func.l('compiledDataClient.startTime:', compiledDataClient.startTime);
-  func.l('compiledDataClient.endTime:', compiledDataClient.endTime);
-
-  const compiledDataServer = compiledData.stats[1];
-  func.l('compiledDataServer.hash:', compiledDataServer.hash);
-  func.l('compiledDataServer.startTime:', compiledDataServer.startTime);
-  func.l('compiledDataServer.endTime:', compiledDataServer.endTime);
-
-  const compiledDataClientHashFilename = Object.keys(compiledDataClient.compilation.assets)[0];
-  func.l('compiledDataClientHashFilename:', compiledDataClientHashFilename);
-}); */
-
 const compilerClient = compiler.compilers.find(compiler => compiler.name === `client-${conf.NODE_ENV}`);
 // const compilerServer = compiler.compilers.find(compiler => compiler.name === `server-${conf.NODE_ENV}`);
 
