@@ -40,11 +40,7 @@ const HTML = `<!DOCTYPE html>
 <title>${conf.appTitle}</title>
 
 <!-- JS -->
-<!--<script src="https://code.jquery.com/jquery-2.1.1.min.js" defer></script>-->
-<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" defer></script>-->
-<!--<script src="/socket.io/socket.io.js" defer></script>-->
 <script src="/js/${bundleFileName}" async defer></script>
-<!--<script>window.__INITIAL_DATA__ = undefined</script>-->
 </head>
 <body>
 
