@@ -14,12 +14,11 @@
   ],
   "license": "ISC",
   "author": "Mikael Wallin <wallindev@gmail.com> (http://wallindev.se)",
-  "main": "./src/server/index",
-  "browser": "./dist/js/client.js",
+  "main": "./src/server/server",
   "repository": "bitbucket:wallindev/chat2-react",
   "scripts": {
-    "build": "npm run build:prod",
-    "build:prod": "export NODE_ENV=production && webpack --display-modules",
+    "build": "export NODE_ENV=production && webpack --display-modules",
+    "clean": "rm -rf ./node_modules && rm -r ./dist/*.js ./dist/**/*.js && rm ./APP_OPENED_IN_BROWSER",
     "start": "npm run start:prod",
     "start:dev": "export NODE_ENV=development && nodemon ./src/server",
     "start:prod": "export NODE_ENV=production && node ./dist/server"
@@ -31,10 +30,12 @@
     "mongodb": "^2.2.36",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.4.4",
