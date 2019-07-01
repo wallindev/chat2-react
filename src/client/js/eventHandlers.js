@@ -1,5 +1,3 @@
-// TODO:
-const l = console.log;
 export default {
   // Check nickname
   checkName: (name, curName) => {
