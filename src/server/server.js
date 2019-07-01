@@ -5,7 +5,6 @@ import func from './include/functions';
 // Dependency modules
 import io from 'socket.io';
 import { MongoClient } from 'mongodb';
-import util from 'util';
 
 import webpack from 'webpack';
 import webpackConfig from '../../webpack.config.babel';
@@ -19,8 +18,6 @@ import devMiddleware from 'webpack-dev-middleware';
 import hotMiddleware from 'webpack-hot-middleware';
 
 import cors from 'cors';
-import colors from 'colors';
-import _ from 'lodash';
 import open from 'open';
 import shelljs from 'shelljs';
 import express from 'express';
@@ -103,13 +100,10 @@ if (!shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
 }
 const sockets = io.listen(server).sockets;
 
-// Database and collection objects
-let db = {};
+// Database collection object
 let coll = {}
-let dbConnState = '';
 
 // Messages and users arrays
-let messages = [];
 let newMessages = [];
 let users = [];
 
@@ -126,8 +120,6 @@ func.log(printModes.DEV, "connString:", connString);
 // Log time
 if (conf.DEVMODE) console.time('start');
 
-// TODO:
-const l = console.log;
 // Connect to and open db
 MongoClient.connect(connString)
   .then(db => {
@@ -168,8 +160,6 @@ MongoClient.connect(connString)
       // Since db connections are done synchronously, there may be a connection to the web server before
       // the db object is propagated (i.e. when the server is restarted)
       // We then tell the user to please reload the browser
-      // dbConnState = db.s.topology.s.server.s.pool.state;
-      // if (dbConnState !== 'connected') {
       if (!db.serverConfig.isConnected()) {
         func.sendStatus({
           message: 'Database temporarily unavailable, please reload your browser',
