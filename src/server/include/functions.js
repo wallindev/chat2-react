@@ -1,7 +1,6 @@
 import conf, { printModes } from './config';
 import colors from './colors';
 import shell from 'shelljs';
-import { StringDecoder } from 'string_decoder';
 
 /*
  * Functions

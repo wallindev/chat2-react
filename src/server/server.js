@@ -68,7 +68,7 @@ const HTML = `<!DOCTYPE html>
 <!-- JS -->
 <!--<script src="https://code.jquery.com/jquery-2.1.1.min.js" defer></script>-->
 <!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" defer></script>-->
-<script src="/socket.io/socket.io.js" defer></script>
+<!--<script src="/socket.io/socket.io.js" defer></script>-->
 <script src="/js/${bundleFileName}" async defer></script>
 <!--<script>window.__INITIAL_DATA__ = undefined</script>-->
 </head>
@@ -149,6 +149,8 @@ func.log(printModes.DEV, "connString:", connString);
 // Log time
 if (conf.DEVMODE) console.time('start');
 
+// TODO:
+const l = console.log;
 // Connect to and open db
 MongoClient.connect(connString)
   .then(db => {
@@ -215,7 +217,7 @@ MongoClient.connect(connString)
       if (conf.DEVMODE) console.time('client connection');
 
       // Retrieve 100 last messages, omit _id field
-      coll.find({}, {_id: 0}).limit(100).sort({created: -1}).toArray()
+      coll.find({}).limit(100).sort({created: -1}).toArray()
         .then(messages => {
           func.log(printModes.ALL, 'Messages retrieved from database');
           func.log(printModes.DEV, "Messages retrieved (on client connection):", JSON.stringify(messages));
@@ -246,7 +248,7 @@ MongoClient.connect(connString)
         .catch(err => func.handleError(err));
 
       // Check if nickname is taken
-      socket.on('checkNick', nickName => {
+      socket.on('checkName', name => {
         // If user array is empty, cleared is true
         // If not, iterate through and search for duplicates
         // If no duplicates found, cleared is true
@@ -256,14 +258,14 @@ MongoClient.connect(connString)
           cleared = true;
         } else {
           for (let i = 0; i < users.length; i++) {
-            if (users[i].name === nickName) {
+            if (users[i].name === name) {
               cleared = false;
               break;
             }
           }
         }
 
-        socket.emit('checkNick', cleared);
+        socket.emit('checkName', cleared);
       });
 
       // Listen for insert emission from client
@@ -272,10 +274,11 @@ MongoClient.connect(connString)
         // in the form of a timestamp
         message.created = (new Date()).getTime();
 
-        // Checking for empty values and regex pattern matching
-        const regex1  = /^\s*$/
-        , regex2      = /^[a-öA-Ö0-9_-]{3,}$/; // Letters a-ö, A-Ö, numbers 0-9, special characters _ and -, and atleast 3 of them
-        let msg       = '';
+        // Checking for empty values
+        const regex1 = /^\s*$/;
+        // Letters a-ö, A-Ö, numbers 0-9, special characters _ and -, and atleast 3 of them
+        const regex2 = /^([a-öA-Ö0-9_\.-]{3,})(\s?)([a-öA-Ö0-9_\.-]*)(\s?)([a-öA-Ö0-9_\.-]*)$/;
+        let msg = '';
         if (regex1.test(message.name) || regex1.test(message.message)) {
           msg = 'Name or message can\'t be empty.';
           console.error(msg);
@@ -312,7 +315,7 @@ MongoClient.connect(connString)
           }, socket);
 
           const user = {
-            id: socket.id,
+            socket: socket.id,
             name: message.name,
             created: (new Date()).getTime() // Timestamp
           };
@@ -350,12 +353,12 @@ MongoClient.connect(connString)
         }
       });
 
-      socket.on('removeUser', nickName => {
+      socket.on('removeUser', name => {
         for (let i = 0; i < users.length; i++) {
-          if (users[i].name === nickName) {
+          if (users[i].name === name) {
             users.splice(i, 1);
             // Remove user from clients user lists
-            sockets.emit('removeUser', nickName);
+            sockets.emit('removeUser', name);
             break;
           }
         }
@@ -364,26 +367,26 @@ MongoClient.connect(connString)
       // Listen for client disconnect
       socket.on('disconnect', () => {
         // Remove user from user array
-        let nickName = '';
+        let name = '';
         if (users.length > 0) {
-          nickName = '';
+          name = '';
 
           for (let i = 0; i < users.length; i++) {
             if (users[i].id === socket.id) {
-              nickName = users[i].name;
+              name = users[i].name;
               users.splice(i, 1);
               break;
             }
           }
 
           // If user has sent messages and thus is registrered with name
-          if (nickName !== '') {
+          if (name !== '') {
             // Remove user from clients user lists
-            sockets.emit('removeUser', nickName);
+            sockets.emit('removeUser', name);
 
             // Send status message to everyone else
             func.sendStatusOthers({
-              message: '<em>' + nickName + '</em> has left the chat',
+              message: '<em>' + name + '</em> has left the chat',
               type: 'info',
               which: 'status',
               clear: false
