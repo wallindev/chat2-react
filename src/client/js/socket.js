@@ -1,14 +1,11 @@
-const getSocket = () => {
-  // const currentUrl = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
-  const socketProtocol = 'ws:';
-  const socketHost = location.hostname;
-  // Socket port must be same as http port (to avoid CORS - Cross-origin resource sharing - conflict)
-  const socketPort = (location.port) ? location.port : 8000;
-  const socketUrl = socketProtocol + '//' + socketHost + ':' + socketPort;
+import socketClient from 'socket.io-client';
 
-  let socket;
+let socket = null;
+export const getSocket = () => {
+  const socketUrl = `${location.protocol}//${location.hostname}:${location.port}`;
+
   try {
-    socket = io.connect(socketUrl);
+    socket = socketClient(socketUrl);
   } catch (e) {
     console.error('Error: ', e.message);
   }
@@ -17,8 +14,6 @@ const getSocket = () => {
     console.error('Error: socket undefined');
     return 1;
   }
-
+  
   return socket;
-}
-
-export default getSocket;
+};
