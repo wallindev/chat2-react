@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-const Chat = ({ title }) => {
+const Chat = ({
+  title, instructions,
+  nameStatus, messageStatus, nameStatusType, messageStatusType,
+  nameStatusStyle, messageStatusStyle,
+  messageDisabled,
+  refTxtName,
+  nameHandler, messageHandler,
+  messages,
+}) => {
+
+  const divMessages = messages && messages.length > 0 && messages.map((message) => {
+    const date = new Date(message.created);
+    // Messages fetched from db has '_id' property, new messages in state only has 'socket' property (from socket.id)
+    const idChatMessage = `chat_message_${message._id || message.socket}`;
+    const idDate = `date_${message._id || message.socket}`;
+    const idName = `name_${message._id || message.socket}`;
+    const idMessage = `message_${message._id || message.socket}`;
+    const shortDate = date.toUTCString();
+    return <div key={ idChatMessage } className="chat-message">
+  <span key={ idDate } className="small" style={{ display: 'block' }}>{ shortDate }</span>
+  <span key={ idName } style={{ fontWeight: 500 }}>{ message.name }</span>: <span key={ idMessage } dangerouslySetInnerHTML={{ __html: message.message }} />
+</div>});
 
   return (
     <div id="chat-wrap" className="col-sm-9">
@@ -10,31 +31,46 @@ const Chat = ({ title }) => {
           <h1 className="panel-title">{ title }</h1>
         </div>
         <div className="panel-body">
-          <div id="instructions" className="small">
-            <p>1. First choose a name. It may contain letters, numbers, the characters '_' and '-', must be at least three characters long and also not be the same as an already active user.</p>
-            <p>2. When you've chosen a valid name, write your message in the textbox below.</p>
-          </div>
+          <div id="instructions" className="small" dangerouslySetInnerHTML={{ __html: instructions }} />
           <div id="chat">
-            <input type="text" id="chat-name" placeholder="Write your name" /> <span id="chat-name-msg"></span>
+            <input type="text" id="chat-name" placeholder="Write your name" ref={refTxtName} onChange={nameHandler} /> <span id="chat-name-msg" className={`text-${nameStatusType}`} style={nameStatusStyle}>{ nameStatus }</span>
             <div id="chat-messages" tabIndex="-1">
-              <div className="chat-message" ng-repeat="message in messages">
-                <span id="message_date_{{ $index }}" ng-bind="message.created | date:'short'" className="small"></span> <br />
-                <span id="message_name_{{ $index }}" ng-bind="message.name"></span>: <span id="message_message_{{ $index }}" ng-bind-html="message.message | html"></span>
-              </div>
+              { divMessages }
             </div>
-            <textarea id="chat-textarea" placeholder="Write your message"></textarea>
+            <textarea id="chat-textarea"
+              placeholder="Write your message"
+              onKeyDown={messageHandler}
+              disabled={messageDisabled}
+            />
             <div id="chat-status">
-              Status: <span id="chat-status-text" className="text-warning"></span>
+              Status: <span id="chat-status-text" className={`text-${messageStatusType}`} dangerouslySetInnerHTML={{ __html: messageStatus }} style={messageStatusStyle} />
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 Chat.propTypes = {
   title: PropTypes.string.isRequired,
+  instructions: PropTypes.string.isRequired,
+  nameStatus: PropTypes.string.isRequired,
+  messageStatus: PropTypes.string.isRequired,
+  nameStatusType: PropTypes.string.isRequired,
+  messageStatusType: PropTypes.string.isRequired,
+  nameStatusStyle: PropTypes.object,
+  messageStatusStyle: PropTypes.object,
+  messageDisabled: PropTypes.bool.isRequired,
+  refTxtName: PropTypes.func.isRequired,
+  nameHandler: PropTypes.func.isRequired,
+  messageHandler: PropTypes.func.isRequired,
+  messages: PropTypes.arrayOf(PropTypes.object).isRequired,
+};
+
+Chat.defaultProps = {
+  title: 'Chat2',
+  instructions: '<p>Instructions here</p>',
 };
 
 export default Chat;
