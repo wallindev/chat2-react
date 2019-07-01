@@ -18,7 +18,7 @@
   "repository": "bitbucket:wallindev/chat2-react",
   "scripts": {
     "build": "export NODE_ENV=production && webpack --display-modules",
-    "clean": "rm -rf ./node_modules && rm -r ./dist/*.js ./dist/**/*.js && rm ./APP_OPENED_IN_BROWSER",
+    "clean": "rm -rf ./node_modules && rm ./dist/*.js ./dist/**/*.js && rm ./APP_OPENED_IN_BROWSER",
     "start": "npm run start:prod",
     "start:dev": "export NODE_ENV=development && nodemon ./src/server",
     "start:prod": "export NODE_ENV=production && node ./dist/server"
