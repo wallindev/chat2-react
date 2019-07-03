@@ -23,7 +23,7 @@ export const printModes = {
 };
 
 // If on Heroku, IS_LOCAL = false
-const IS_LOCAL = true;
+const IS_LOCAL = false;
 
 export default {
   IS_LOCAL,
