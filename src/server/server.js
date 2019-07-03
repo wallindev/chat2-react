@@ -5,18 +5,22 @@ import func from './include/functions';
 // Dependency modules
 import io from 'socket.io';
 import { MongoClient } from 'mongodb';
-import util from 'util';
 
 import webpack from 'webpack';
 import webpackConfig from '../../webpack.config.babel';
 
-const compiler = webpack(webpackConfig);
-
-const compilerClient = compiler.compilers.find(compiler => compiler.name === `client-${conf.NODE_ENV}`);
-// const compilerServer = compiler.compilers.find(compiler => compiler.name === `server-${conf.NODE_ENV}`);
-
 import devMiddleware from 'webpack-dev-middleware';
 import hotMiddleware from 'webpack-hot-middleware';
+
+let compiler;
+let compilerClient;
+// let compilerServer;
+// Only in dev mode
+if (conf.DEVMODE) {
+  compiler = webpack(webpackConfig);
+  compilerClient = compiler.compilers.find(compiler => compiler.name === `client-${conf.NODE_ENV}`);
+  // compilerServer = compiler.compilers.find(compiler => compiler.name === `server-${conf.NODE_ENV}`);
+}
 
 import cors from 'cors';
 import open from 'open';
@@ -87,14 +91,6 @@ app.get("/", (req, res) => {
 // Spin upp server and sockets
 const server = app.listen(conf.APP_PORT, conf.APP_HOST);
 func.log(printModes.ALL, `ExpressJS: Web server started @ ${conf.APP_HOST} on port ${conf.APP_PORT}`);
-
-// For dev purpose, so that browser is only opened
-// on start, not on every restart
-if (!shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
-  // shelljs.exec(`xdg-open ${conf.APP_HOST}:${conf.APP_PORT}`);
-  open(`${conf.APP_HOST}:${conf.APP_PORT}`); // OS/Platform independent
-  if (conf.DEVMODE) shelljs.touch('APP_OPENED_IN_BROWSER');
-}
 const sockets = io.listen(server).sockets;
 
 // Database collection object
@@ -133,7 +129,17 @@ MongoClient.connect(connString, { useNewUrlParser: true })
 
     // Retrieve 100 last messages, omit _id field
     coll.find({}, {_id: 0}).limit(100).sort({created: -1}).toArray()
-      .then(messages => func.log(printModes.DEV, "Messages retrieved (on start):", JSON.stringify(messages)))
+      .then(messages => {
+        func.log(printModes.DEV, "Messages retrieved (on start):", JSON.stringify(messages));
+        // For dev purpose, so that browser is only opened
+        // on first start, not on every restart
+        if (!shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
+          // Open browser (OS/Platform independent)
+          open(`${conf.APP_HOST}:${conf.APP_PORT}`);
+          // Set opened "flag"
+          if (conf.DEVMODE) shelljs.touch('APP_OPENED_IN_BROWSER');
+        }
+      })
       .catch(err => func.handleError(err));
 
     // Run the "save loop" every minute:
