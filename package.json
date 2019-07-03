@@ -26,10 +26,13 @@
   "dependencies": {
     "colors": "^1.3.3",
     "cors": "^2.8.5",
+    "cross-env": "^5.2.0",
     "express": "^4.16.4",
     "mongodb": "^3.2.7",
+    "open": "^6.4.0",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
+    "shelljs": "^0.8.3",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0"
   },
@@ -40,11 +43,8 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.4.4",
     "babel-loader": "^8.0.6",
-    "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
     "nodemon": "^1.18.10",
-    "open": "^6.3.0",
-    "shelljs": "^0.8.3",
     "style-loader": "^0.23.1",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2",
@@ -54,6 +54,6 @@
   },
   "engines": {
     "node": ">=10.15.1 <11.10.0",
-    "mongod": "^3.2.11"
+    "mongod": "^4.0.10"
   }
 }
