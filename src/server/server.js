@@ -5,6 +5,7 @@ import func from './include/functions';
 // Dependency modules
 import io from 'socket.io';
 import { MongoClient } from 'mongodb';
+import util from 'util';
 
 import webpack from 'webpack';
 import webpackConfig from '../../webpack.config.babel';
@@ -84,14 +85,14 @@ app.get("/", (req, res) => {
 });
 
 // Spin upp server and sockets
-const server = app.listen(conf.httpPort, conf.ipAddress);
-func.log(printModes.ALL, `ExpressJS: Web server started @ ${conf.ipAddress} on port ${conf.httpPort}`);
+const server = app.listen(conf.APP_PORT, conf.APP_HOST);
+func.log(printModes.ALL, `ExpressJS: Web server started @ ${conf.APP_HOST} on port ${conf.APP_PORT}`);
 
 // For dev purpose, so that browser is only opened
 // on start, not on every restart
 if (!shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
-  // shelljs.exec(`xdg-open ${conf.ipAddress}:${conf.httpPort}`);
-  open(`${conf.ipAddress}:${conf.httpPort}`); // OS/Platform independent
+  // shelljs.exec(`xdg-open ${conf.APP_HOST}:${conf.APP_PORT}`);
+  open(`${conf.APP_HOST}:${conf.APP_PORT}`); // OS/Platform independent
   if (conf.DEVMODE) shelljs.touch('APP_OPENED_IN_BROWSER');
 }
 const sockets = io.listen(server).sockets;
@@ -107,19 +108,25 @@ let users = [];
   * Core database functionality
   *
   */
-// With --noauth
-const connString = 'mongodb://' + conf.DBSERVER + '/' + conf.DBNAME;
-// With --auth
-// const connString = 'mongodb://' + conf.DBUSER + ':' + conf.DBPASS + '@' + conf.DBSERVER + '/' + conf.DBNAME;
+let connString;
+// Local or Remote (MongoDB Atlas cluster)
+if (conf.IS_LOCAL)
+  connString = `${conf.DB_PROTOCOL}://${conf.DB_HOST}/${conf.DB_NAME}`;
+else
+  connString = `${conf.DB_PROTOCOL}://${conf.DB_USER}:${conf.DB_PASS}@${conf.DB_HOST}/${conf.DB_NAME}`;
+
 func.log(printModes.DEV, "connString:", connString);
 
 // Log time
 if (conf.DEVMODE) console.time('start');
 
 // Connect to and open db
-MongoClient.connect(connString)
-  .then(db => {
-    func.log(printModes.ALL, "MongoDB: Connection to '" + conf.DBNAME + "' on '" + conf.DBSERVER + "' opened.\n");
+MongoClient.connect(connString, { useNewUrlParser: true })
+  .then(client => {
+    func.log(printModes.ALL, "MongoDB: Connection to '" + conf.DB_NAME + "' on '" + conf.DB_HOST + "' opened.\n");
+
+    // Db
+    const db = client.db(conf.DBNAME);
 
     // Database collection
     coll = db.collection('messages');
@@ -135,7 +142,7 @@ MongoClient.connect(connString)
         if (conf.DEVMODE) console.time('save loop');
 
         // Insert the new documents
-        coll.insert(newMessages)
+        coll.insertMany(newMessages)
           .then(messagesInserted => {
             func.log(printModes.PROD, 'Messages saved to database');
             func.log(printModes.DEV, "Messages inserted:", JSON.stringify(messagesInserted));

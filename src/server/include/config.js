@@ -1,11 +1,16 @@
 import path from 'path';
-import shelljs from 'shelljs'
+import shelljs from 'shelljs';
 
 /*
  * Config
  *
  */
-const NODE_ENV = process.env.NODE_ENV;
+let NODE_ENV = process.env.NODE_ENV || 'development';
+if (NODE_ENV !== 'development' && NODE_ENV !== 'production') {
+  console.warn("NODE_ENV environment variable wasn't set correctly, must be either 'development' or 'production'");
+  NODE_ENV = 'development';
+  console.warn("Setting NODE_ENV to 'development' and continuing...");
+}
 const MODE = NODE_ENV === 'development' ? 'dev' : 'prod';
 
 const publicDir = path.resolve(__dirname, './../../../dist');
@@ -17,7 +22,11 @@ export const printModes = {
   PROD: 2,
 };
 
+// If on Heroku, IS_LOCAL = false
+const IS_LOCAL = false;
+
 export default {
+  IS_LOCAL,
   NODE_ENV,
   MODE,
 
@@ -31,16 +40,17 @@ export default {
   publicDir,
   publicPath,
 
-  // OpenShift node.js port and IP address
-  httpPort: process.env.PORT  || 8080,
-  ipAddress: process.env.IP  || "127.0.0.1",
+  // App host and port
+  APP_HOST: "localhost",
+  APP_PORT: 8080,
 
   // Database constants
-  DBSERVER: process.env.DB_HOST || "127.0.0.1",
-  DBPORT: process.env.DB_PORT || 27017,
-  DBNAME: 'chat',
-  DBUSER: 'chatUser',
-  DBPASS: 'chatPassword',
+  DB_PROTOCOL: IS_LOCAL ? "mongodb" : 'mongodb+srv',
+  DB_HOST: IS_LOCAL ? "127.0.0.1" : 'cluster-m0-1qe5b.mongodb.net',
+  DB_PORT: 27017,
+  DB_NAME: 'chat',
+  DB_USER: 'chatUser',
+  DB_PASS: 'chatPassword',
 };
 
 // Exit handling, cleanup, etc.

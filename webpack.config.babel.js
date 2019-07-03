@@ -16,7 +16,7 @@ const distPath = path.resolve(__dirname, 'dist');
 const bundlePath = `${distPath}/js`;
 const bundleClient = `client.${conf.DEVMODE ? 'dev' : '[hash]'}.js`;
 const bundleServer = `server.js`;
-const publicPath = `http://localhost:${conf.httpPort}/js/`;
+const publicPath = `http://localhost:${conf.APP_PORT}/js/`;
 const hotUpdate = conf.DEVMODE ? {
   hotUpdateChunkFilename: ".hot/[id].[hash].hot-update.js",
   hotUpdateMainFilename: ".hot/[hash].hot-update.json"
