@@ -51,9 +51,5 @@
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
-  },
-  "engines": {
-    "node": ">=10.15.1 <11.10.0",
-    "mongod": "^4.0.10"
   }
 }
