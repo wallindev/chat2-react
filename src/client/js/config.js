@@ -1,4 +1,4 @@
-export const chatTitle = 'Chat2, dude!';
+export const chatTitle = 'Chat2';
 
 export const instructions = `<p>1. First choose a name. It may contain letters, numbers, the characters '_' and '-', must be at least three characters long and also not be the same as an already active user.</p>
 <p>2. When you've chosen a valid name, write your message in the textbox below.</p>`;
