@@ -42,7 +42,7 @@ export default {
 
   // App host and port
   APP_HOST: "localhost",
-  APP_PORT: 8080,
+  APP_PORT: process.env.PORT || 8080,
 
   // Database constants
   DB_PROTOCOL: IS_LOCAL ? "mongodb" : 'mongodb+srv',
