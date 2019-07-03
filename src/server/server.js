@@ -131,9 +131,9 @@ MongoClient.connect(connString, { useNewUrlParser: true })
     coll.find({}, {_id: 0}).limit(100).sort({created: -1}).toArray()
       .then(messages => {
         func.log(printModes.DEV, "Messages retrieved (on start):", JSON.stringify(messages));
-        // For dev purpose, so that browser is only opened
+        // For local dev purpose, so that browser is only opened
         // on first start, not on every restart
-        if (!shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
+        if (conf.IS_LOCAL && !shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
           // Open browser (OS/Platform independent)
           open(`${conf.APP_HOST}:${conf.APP_PORT}`);
           // Set opened "flag"
