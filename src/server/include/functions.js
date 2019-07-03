@@ -1,6 +1,8 @@
+import shell from 'shelljs';
+const { exec } = require('child_process');
+
 import conf, { printModes } from './config';
 import colors from './colors';
-import shell from 'shelljs';
 
 /*
  * Functions
