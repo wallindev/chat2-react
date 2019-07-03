@@ -89,7 +89,7 @@ app.get("/", (req, res) => {
 });
 
 // Spin upp server and sockets
-const server = app.listen(conf.APP_PORT, conf.APP_HOST);
+const server = app.listen(conf.APP_PORT);
 func.log(printModes.ALL, `ExpressJS: Web server started @ ${conf.APP_HOST} on port ${conf.APP_PORT}`);
 const sockets = io.listen(server).sockets;
 
