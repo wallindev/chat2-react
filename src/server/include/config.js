@@ -23,7 +23,7 @@ export const printModes = {
 };
 
 // If on Heroku, IS_LOCAL = false
-const IS_LOCAL = false;
+const IS_LOCAL = true;
 
 export default {
   IS_LOCAL,
@@ -55,7 +55,8 @@ export default {
 
 // Exit handling, cleanup, etc.
 ['exit', 'SIGINT', 'uncaughtException'].forEach(signal => process.on(signal, msg => {
-  if (shelljs.test('-e', 'APP_OPENED_IN_BROWSER'))
+  // Only if on local
+  if (IS_LOCAL && shelljs.test('-e', 'APP_OPENED_IN_BROWSER'))
     shelljs.rm('APP_OPENED_IN_BROWSER');
 
   if (signal === 'uncaughtException')
