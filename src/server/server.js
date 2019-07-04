@@ -340,8 +340,14 @@ MongoClient.connect(connString, { useNewUrlParser: true })
         }
       });
 
+      // Listen for client leave
+      socket.on('leave', () => {
+        func.log(printModes.ALL, 'socket leave');
+      });
+
       // Listen for client disconnect
       socket.on('disconnect', () => {
+        func.log(printModes.ALL, 'socket disconnect');
         // Remove user from user array
         let name = '';
         if (users.length > 0) {
