@@ -1,7 +1,7 @@
 {
   "name": "chat2-react",
   "version": "1.0.0",
-  "description": "Chat application with a Express.js and SSR (Server-Side React) backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from my 'nodejs-chat' app",
+  "description": "Chat application with a React.js frontend and Node.js/Express.js backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from my 'nodejs-chat' app",
   "keywords": [
     "Real-time",
     "Chat",
@@ -33,12 +33,12 @@
     "colors": "^1.3.3",
     "cors": "^2.8.5",
     "cross-env": "^5.2.0",
-    "css-loader": "^2.1.1",
-    "express": "^4.16.4",
+    "css-loader": "^3.0.0",
+    "express": "^4.17.1",
     "mongodb": "^3.2.7",
     "open": "^6.4.0",
-    "react": "^16.8.2",
-    "react-dom": "^16.8.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "shelljs": "^0.8.3",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
@@ -50,6 +50,6 @@
     "webpack-node-externals": "^1.7.2"
   },
   "devDependencies": {
-    "nodemon": "^1.18.10"
+    "nodemon": "^1.19.1"
   }
 }
