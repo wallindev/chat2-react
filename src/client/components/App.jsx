@@ -98,23 +98,52 @@ export default class ChatApp extends Component {
   }
 
   handleMessage = (e) => {
-    const msg = e.target.value;
+    const message = e.target.value;
+    const name = this.domRefs.txtName.value;
+
     // User pressed only Enter key, not with Shift or Ctrl key
     if (e.which === 13 && e.shiftKey === false && e.ctrlKey === false) {
       // Prevent newline (Enter key) to get in message
       e.preventDefault();
+
       // Check if name is valid
-      if (!eventHandlers.checkMessage(msg, this.state.name, this.domRefs.txtName.value)) {
+      if (!eventHandlers.checkMessage(message, this.state.name, name)) {
         this.setStateCB({ messageStatus: 'Message can\'t be empty', messageStatusType: 'danger' });
         this.restoreMessageStatus();
         return;
       }
 
+      let msg = '';
+      // Check so no other user chose same name and sent message first
+      this.state.users && this.state.users.forEach(user => {
+        if (user.name === name)
+          msg = 'Already an active user with this name';
+      });
+
+      if (msg !== '') {
+        this.setStateCB({ messageStatus: msg, messageStatusType: 'danger' });
+        return 1;
+      }
+
+      // TODO: Do we need this check?
+      // Store user name if not already stored
+      /* if (this.state.name === '') {
+        this.state.name = name;
+      } else {
+        // If name is stored, and it's been changed during same session
+        // we have to remove old name and replace with new
+        if (this.state.name !== name) {
+          socket.emit('removeUser', this.state.name);
+          this.setStateCB({ name, nameStatus: '', nameStatusType: conf.NAME_STATUS_TYPE });
+        }
+      } */
+
       // Send message to server to be inserted in db
       this.socket.emit('insert', {
-        socket: this.socket.id,
+        // TODO: Set on server instead
+        // socket: this.socket.id,
         name: this.state.name,
-        message: (!conf.VIEW_HTML) ? htmlspecialchars(msg) : msg
+        message: (!conf.VIEW_HTML) ? htmlspecialchars(message) : message
       });
 
       // Clear message box
@@ -125,13 +154,18 @@ export default class ChatApp extends Component {
   // Uses setTimeOut and CSS transitions to wait, fade out old msg, fade in new msg
   // Need to clear timer every time so only the latest is in effect
   restoreNameStatus = () => {
-    this.nameStatusTimer ? this.nameStatusTimer.forEach(timer => clearTimeout(timer)) : this.nameStatusTimer = [];
+    this.nameStatusTimer ?
+      this.nameStatusTimer.forEach(timer => clearTimeout(timer)) :
+      this.nameStatusTimer = [];
+
     this.nameStatusTimer[0] = setTimeout(() => {
       this.setStateCB({ nameStatusStyle: { opacity: 0 } });
     }, conf.NAME_STATUS_TIMEOUT);
+
     this.nameStatusTimer[1] = setTimeout(() => {
       this.setStateCB({ nameStatus: conf.NAME_STATUS, nameStatusType: conf.NAME_STATUS_TYPE })
     }, (conf.NAME_STATUS_TIMEOUT + 250));
+
     this.nameStatusTimer[2] = setTimeout(() => {
       this.setStateCB({ nameStatusStyle: { opacity: 1 } });
     }, (conf.NAME_STATUS_TIMEOUT + 500));
@@ -140,13 +174,18 @@ export default class ChatApp extends Component {
   // Uses setTimeOut and CSS transitions to wait, fade out old msg, fade in new msg
   // Need to clear timer every time so only the latest is in effect
   restoreMessageStatus = () => {
-    this.messageStatusTimer ? this.messageStatusTimer.forEach(timer => clearTimeout(timer)) : this.messageStatusTimer = [];
-    this.messageStatusTimer[0] = setTimeout(() => {
+    this.messageStatusTimer ?
+      this.messageStatusTimer.forEach(timer => clearTimeout(timer)) :
+      this.messageStatusTimer = [];
+
+      this.messageStatusTimer[0] = setTimeout(() => {
       this.setStateCB({ messageStatusStyle: { opacity: 0 } });
     }, conf.MESSAGE_STATUS_TIMEOUT);
+
     this.messageStatusTimer[1] = setTimeout(() => {
       this.setStateCB({ messageStatus: conf.MESSAGE_STATUS, messageStatusType: conf.MESSAGE_STATUS_TYPE })
     }, (conf.MESSAGE_STATUS_TIMEOUT + 250));
+
     this.messageStatusTimer[2] = setTimeout(() => {
       this.setStateCB({ messageStatusStyle: { opacity: 1 } });
     }, (conf.MESSAGE_STATUS_TIMEOUT + 500));
@@ -162,7 +201,7 @@ export default class ChatApp extends Component {
     // Name already used?
     this.socket.on('checkName', cleared => {
       if (!cleared) {
-        this.setStateCB({ nameStatus: 'Name occupied', nameStatusType: 'danger', messageDisabled: true });
+        this.setStateCB({ nameStatus: 'Name taken', nameStatusType: 'danger', messageDisabled: true });
       } else {
         this.setStateCB({ nameStatus: 'Name OK', nameStatusType: 'success', messageDisabled: false });
         this.restoreNameStatus();
@@ -184,26 +223,22 @@ export default class ChatApp extends Component {
 
     // Listen for listUsers emission from server
     this.socket.on('listUsers', users => {
-      // Display users
-      if (users.length) {
-        if (users.length === 1) {
-          // Add user first in users array (if not already there)
-          let userExists = false;
-          if (this.state.users.length === 0) {
-            userExists = false;
-          } else {
-            for (let i = 0; i < this.state.users.length; i++) {
-              if (this.state.users[i].name === users[0].name) {
-                userExists = true;
-                break;
-              }
-            }
-          }
-          if (!userExists)
-            this.setState({ users: [users[0], ...this.state.users]});
-        } else {
-          this.setState({ users });
-        }
+      if (!users || users.length === 0)
+        return;
+
+      // If new user, add to user array
+      if (users.length === 1) {
+        // Make sure username doesn't exist
+        // TODO: This error should have been spotted already,
+        // If duplicate users are listed here, ther must be something wrong somewhere,
+        // and therefore perhaps we shouldn't have a check here
+        this.state.users.forEach(user => {
+          if (users[0].name === user.name)
+            return;
+        });
+        this.setState({ users: [users[0], ...this.state.users]});
+      } else {
+        this.setState({ users });
       }
     });
 
@@ -212,7 +247,8 @@ export default class ChatApp extends Component {
       // Remove user from user array
       for (let i = 0; i < this.state.users.length; i++) {
         if (this.state.users[i].name === name) {
-          this.state.users.splice(i, 1);
+          let users = new Array(...this.state.users);
+          users.splice(i, 1);
           this.setState({ users });
           break;
         }
@@ -220,9 +256,9 @@ export default class ChatApp extends Component {
     });
 
     // Listen for status emission from server
-    this.socket.on('status', data => {
-      this.setStateCB({ messageStatus: data.message, messageStatusType: data.type });
-      this.restoreMessageStatus();
+    this.socket.on('status', ({ message, type, clear = true }) => {
+      this.setStateCB({ messageStatus: message, messageStatusType: type });
+      if (clear) this.restoreMessageStatus();
     });
   }
 };
