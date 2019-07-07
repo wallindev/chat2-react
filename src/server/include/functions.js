@@ -20,22 +20,6 @@ export default {
   l,
   colorPrint,
 
-  // Send status messages to all sockets (connected clients)
-  sendStatusAll: data => sockets.emit('status', data),
-
-  // Send status messages to specific socket (connected client)
-  sendStatus: (data, s) => s.emit('status', data),
-
-  // Send status messages to all (connected clients) except for the one sending
-  sendStatusOthers: (data, s) => s.broadcast.emit('status', data),
-
-  getTimestamp: () => {
-    var dt = new Date();
-    dt.setHours(dt.getHours()-24);
-    var stamp = dt.getTime();
-    return stamp;
-  },
-
   handleError: error => {
     const msg = `${new Date()}
 Exception of type '${error.name}' thrown:
@@ -55,6 +39,7 @@ ${error.stack}`;
     const color = conf.PRODMODE ? 'FgCyan' : 'FgMagenta';
     args.length > 1 ? colorPrint(color, ...args) : colorPrint(color, args[0]);
   },
+
   getBundleFileName: (config) => {
     // In DEV mode, simply return output filename in webpack config file
     if (conf.DEVMODE)
