@@ -9,11 +9,11 @@ export const getSocket = () => {
   } catch (e) {
     console.error('Error: ', e.message);
   }
-  
+
   if (socket === undefined) {
     console.error('Error: socket undefined');
     return 1;
   }
-  
+
   return socket;
 };
