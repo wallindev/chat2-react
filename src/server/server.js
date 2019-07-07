@@ -5,6 +5,7 @@ import func from './include/functions';
 // Dependency modules
 import io from 'socket.io';
 import { MongoClient } from 'mongodb';
+import util from 'util';
 
 import webpack from 'webpack';
 import webpackConfig from '../../webpack.config.babel';
@@ -88,10 +89,10 @@ app.get("/", (req, res) => {
   res.send(HTML);
 });
 
-// Spin upp server and sockets
+// Spin upp web and socket server
 const server = app.listen(conf.APP_PORT);
 func.log(printModes.ALL, `ExpressJS: Web server started @ ${conf.APP_HOST} on port ${conf.APP_PORT}`);
-const sockets = io.listen(server).sockets;
+const socketServer = io.listen(server).sockets;
 
 // Database collection object
 let coll = {}
@@ -128,9 +129,9 @@ MongoClient.connect(connString, { useNewUrlParser: true })
     coll = db.collection('messages');
 
     // Retrieve 100 last messages, omit _id field
-    coll.find({}, {_id: 0}).limit(100).sort({created: -1}).toArray()
+    coll.find({}, {_id: 0}).sort({created: -1}).limit(100).toArray()
       .then(messages => {
-        func.log(printModes.DEV, "Messages retrieved (on start):", JSON.stringify(messages));
+        func.log(printModes.DEV, "Messages retrieved (on start):", util.inspect(messages, false, 3));
         // For local dev purpose, so that browser is only opened
         // on first start, not on every restart
         if (conf.IS_LOCAL && !shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
@@ -151,7 +152,7 @@ MongoClient.connect(connString, { useNewUrlParser: true })
         coll.insertMany(newMessages)
           .then(messagesInserted => {
             func.log(printModes.PROD, 'Messages saved to database');
-            func.log(printModes.DEV, "Messages inserted:", JSON.stringify(messagesInserted));
+            func.log(printModes.DEV, "Messages inserted:", util.inspect(messagesInserted, false, 3));
 
             // Empty newMessages array
             newMessages = [];
@@ -163,51 +164,45 @@ MongoClient.connect(connString, { useNewUrlParser: true })
     }, 60000);
 
     // Fires when there's a http connection to the server
-    sockets.on('connection', socket => {
+    socketServer.on('connection', socket => {
       func.log(printModes.ALL, 'Client connected to chat');
 
       // Since db connections are done synchronously, there may be a connection to the web server before
       // the db object is propagated (i.e. when the server is restarted)
       // We then tell the user to please reload the browser
       if (!db.serverConfig.isConnected()) {
-        func.sendStatus({
+        socket.emit('status', {
           message: 'Database temporarily unavailable, please reload your browser',
-          type: 'primary',
-          which: 'status',
-          clear: false,
-          restore: false
-        }, socket);
+          type: 'primary'
+        });
         return 1;
       }
 
       // Welcome user
-      const welcomeMsg = 'Welcome to the chat! =)';
-      func.sendStatus({
-        message: welcomeMsg,
-        type: 'primary',
-        which: 'status',
-        clear: false
-      }, socket);
+      socket.emit('status', {
+        message: 'Welcome to the chat! =)',
+        type: 'primary'
+      });
 
       // Start time logging
       if (conf.DEVMODE) console.time('client connection');
 
       // Retrieve 100 last messages, omit _id field
-      coll.find({}).limit(100).sort({created: -1}).toArray()
+      coll.find({}).sort({created: -1}).limit(100).toArray()
         .then(messages => {
           func.log(printModes.ALL, 'Messages retrieved from database');
-          func.log(printModes.DEV, "Messages retrieved (on client connection):", JSON.stringify(messages));
+          func.log(printModes.DEV, "Messages retrieved (on client connection):", util.inspect(messages, false, 3));
 
           // If there are new messages that are not yet saved to db, we have to include them here
-          func.log(printModes.DEV, "new messages:", JSON.stringify(newMessages));
-          func.log(printModes.DEV, "old messages:", JSON.stringify(messages));
+          func.log(printModes.DEV, "new messages:", util.inspect(newMessages, false, 3));
+          func.log(printModes.DEV, "old messages:", util.inspect(messages, false, 3));
           let allMessages = [];
           if (newMessages.length) {
             allMessages = newMessages.concat(messages);
           } else {
             allMessages = messages;
           }
-          func.log(printModes.DEV, "all messages:", JSON.stringify(messages));
+          func.log(printModes.DEV, "all messages:", util.inspect(messages, false, 3));
 
           // Send messages array to client
           socket.emit('listMessages', allMessages);
@@ -246,87 +241,78 @@ MongoClient.connect(connString, { useNewUrlParser: true })
 
       // Listen for insert emission from client
       socket.on('insert', message => {
-        // Add date on server instead of client
-        // in the form of a timestamp
-        message.created = (new Date()).getTime();
-
         // Checking for empty values
         const regex1 = /^\s*$/;
         // Letters a-ö, A-Ö, numbers 0-9, special characters _ and -, and atleast 3 of them
         const regex2 = /^([a-öA-Ö0-9_\.-]{3,})(\s?)([a-öA-Ö0-9_\.-]*)(\s?)([a-öA-Ö0-9_\.-]*)$/;
+
         let msg = '';
-        if (regex1.test(message.name) || regex1.test(message.message)) {
+        if (regex1.test(message.name) || regex1.test(message.message))// {
           msg = 'Name or message can\'t be empty.';
-          console.error(msg);
-          func.sendStatus({
-            message: msg,
-            type: 'danger',
-            which: 'status',
-            clear: false
-          }, socket);
-          return 1;
-        } else if (!regex2.test(message.name)) {
+        else if (!regex2.test(message.name))
           msg = 'Name must be at least three characters long and contain valid characters.';
+
+        if (msg !== '') {
           console.error(msg);
-          func.sendStatus({
+          socket.emit('status', {
             message: msg,
             type: 'danger',
-            which: 'status',
             clear: false
-          }, socket);
+          });
           return 1;
-        } else {
-          // Insert to messages array and send to client
-          newMessages.unshift(message);
-          func.log(printModes.DEV, "Inserted message:", JSON.stringify(message));
-
-          // Send message to all clients
-          sockets.emit('listMessages', [message]);
-
-          func.sendStatus({
-            message: 'Message sent',
-            type: 'success',
-            which: 'status',
-            clear: true
-          }, socket);
-
-          const user = {
-            socket: socket.id,
-            name: message.name,
-            created: (new Date()).getTime() // Timestamp
-          };
-
-          // If user array is empty, insert user object
-          // If not iterate through and search for duplicates
-          // If no duplicates found, insert user object
-          // Unshift puts user as first object in array instead of last
-          let userExists = false;
-          if (users.length === 0) {
-            userExists = false;
-          } else {
-            for (let i = 0; i < users.length; i++) {
-              if (users[i].name === user.name) {
-                userExists = true;
-                break;
-              }
-            }
-          }
-
-          if(!userExists) {
-            users.unshift(user);
-
-            // Send status message to everyone else
-            func.sendStatusOthers({
-              message: '<em>' + user.name + '</em> has joined the chat',
-              type: 'primary',
-              which: 'status',
-              clear: false
-            }, socket);
-          }
-
-          // Add user on all clients user lists
-          sockets.emit('listUsers', [user]);
         }
+
+        let msg2 = '';
+        // Check so no other user chose same name and sent message first
+        users && users.forEach(user => {
+          if (user.name === message.name)
+            msg2 = 'Already an active user with this name';
+        });
+
+        if (msg2 !== '') {
+          console.error(msg2);
+          socket.emit('status', {
+            message: msg2,
+            type: 'danger',
+            clear: false
+          });
+          return 1;
+        }
+
+        // If no duplicate users found, add user to users array
+        // and message to message array
+
+        // Add socket id and date timestamp on server instead of client
+        message.socket = socket.id;
+        message.created = (new Date()).getTime();
+
+        // Insert to messages array and send to client (unshift injects first)
+        newMessages.unshift(message);
+        func.log(printModes.DEV, "Inserted message:", util.inspect(message, false, 3));
+
+        // Send message to all clients
+        socketServer.emit('listMessages', [message]);
+
+        socket.emit('status', {
+          message: 'Message sent',
+          type: 'success'
+        });
+
+        // Add new user object first in user array
+        users.unshift({
+          socket: message.socket,
+          name: message.name,
+          created: message.created // Timestamp
+        });
+
+        // Add user on all clients user lists
+        socketServer.emit('listUsers', [users[0]]);
+
+        // Send status message to everyone else
+        socket.broadcast.emit('status', {
+          message: '<em>' + users[0].name + '</em> has joined the chat',
+          type: 'primary'
+        });
       });
 
       socket.on('removeUser', name => {
@@ -334,51 +320,35 @@ MongoClient.connect(connString, { useNewUrlParser: true })
           if (users[i].name === name) {
             users.splice(i, 1);
             // Remove user from clients user lists
-            sockets.emit('removeUser', name);
+            socketServer.emit('removeUser', name);
             break;
           }
         }
       });
 
-      // Listen for client leave
-      socket.on('leave', () => {
-        func.log(printModes.ALL, 'socket leave');
-      });
-
       // Listen for client disconnect
       socket.on('disconnect', () => {
-        func.log(printModes.ALL, 'socket disconnect');
-        // Remove user from user array
-        let name = '';
-        if (users.length > 0) {
-          name = '';
+        users && users.forEach((user, i) => {
+          if (user.socket === socket.id) {
+            // Remove user from user array
+            users.splice(i, 1);
 
-          for (let i = 0; i < users.length; i++) {
-            if (users[i].id === socket.id) {
-              name = users[i].name;
-              users.splice(i, 1);
-              break;
-            }
-          }
-
-          // If user has sent messages and thus is registrered with name
-          if (name !== '') {
             // Remove user from clients user lists
-            sockets.emit('removeUser', name);
+            socketServer.emit('removeUser', user.name);
 
             // Send status message to everyone else
-            func.sendStatusOthers({
-              message: '<em>' + name + '</em> has left the chat',
+            socket.broadcast.emit('status', {
+              message: '<em>' + user.name + '</em> has left the chat',
               type: 'info',
-              which: 'status',
-              clear: false
-            }, socket);
+            });
+
+            return;
           }
-        }
+        });
       });
     });
 
-    db.on('close', () => func.log(printModes.ALL, 'Connection closed unexpectedly'));
+    db.on('close', () => func.log(printModes.ALL, 'Database connection closed unexpectedly'));
 
     // TODO: Force close? db.close(true)
     // db.close().then((err, res) => {
