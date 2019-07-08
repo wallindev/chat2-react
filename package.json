@@ -1,6 +1,6 @@
 {
   "name": "chat2-react",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Chat application with a React.js frontend and Node.js/Express.js backend. Uses web sockets (Socket.io) to send messages between clients and server in real-time. Messages are saved in bulk every sixty seconds (configurable) - instead of connecting to db every time a message is sent - to MongoDB which minimizes the server load. With a new frontend in React.js, bundled with Webpack, this is almost a complete rewrite from my 'nodejs-chat' app",
   "keywords": [
     "Real-time",
