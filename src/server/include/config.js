@@ -1,11 +1,12 @@
 import path from 'path';
-import shelljs from 'shelljs';
+import fs from 'fs';
 
 /*
  * Config
  *
  */
 let NODE_ENV = process.env.NODE_ENV || 'development';
+// TODO: Not optimal to set NODE_ENV here, best if we could get cross-env to work..
 if (NODE_ENV !== 'development' && NODE_ENV !== 'production') {
   console.warn("NODE_ENV environment variable wasn't set correctly, must be either 'development' or 'production'");
   NODE_ENV = 'development';
@@ -22,10 +23,13 @@ export const printModes = {
   PROD: 2,
 };
 
+const LOCK_FILE = './APP_OPENED_IN_BROWSER';
+
 // If on Heroku, IS_LOCAL = false
 const IS_LOCAL = false;
 
 export default {
+  LOCK_FILE,
   IS_LOCAL,
   NODE_ENV,
   MODE,
@@ -56,10 +60,11 @@ export default {
 // Exit handling, cleanup, etc.
 ['exit', 'SIGINT', 'uncaughtException'].forEach(signal => process.on(signal, msg => {
   // Only if on local
-  if (IS_LOCAL && shelljs.test('-e', 'APP_OPENED_IN_BROWSER'))
-    shelljs.rm('APP_OPENED_IN_BROWSER');
+  if (IS_LOCAL && fs.existsSync(LOCK_FILE))
+    fs.unlinkSync(LOCK_FILE);
 
   if (signal === 'uncaughtException')
     console.error(signal, msg);
+
   process.exit();
 }));
