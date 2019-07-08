@@ -25,7 +25,7 @@ if (conf.DEVMODE) {
 
 import cors from 'cors';
 import open from 'open';
-import shelljs from 'shelljs';
+import fs from 'fs';
 import express from 'express';
 const app = express();
 
@@ -134,11 +134,11 @@ MongoClient.connect(connString, { useNewUrlParser: true })
         func.log(printModes.DEV, "Messages retrieved (on start):", util.inspect(messages, false, 3));
         // For local dev purpose, so that browser is only opened
         // on first start, not on every restart
-        if (conf.IS_LOCAL && !shelljs.test('-e', 'APP_OPENED_IN_BROWSER')) {
+        if (conf.IS_LOCAL && ! fs.existsSync(conf.LOCK_FILE)) {
           // Open browser (OS/Platform independent)
           open(`${conf.APP_HOST}:${conf.APP_PORT}`);
           // Set opened "flag"
-          if (conf.DEVMODE) shelljs.touch('APP_OPENED_IN_BROWSER');
+          if (conf.DEVMODE) fs.closeSync(fs.openSync(conf.LOCK_FILE, 'w'));
         }
       })
       .catch(err => func.handleError(err));
