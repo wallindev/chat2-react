@@ -1,6 +1,4 @@
-import shell from 'shelljs';
-const { exec } = require('child_process');
-
+import fs from 'fs';
 import conf, { printModes } from './config';
 import colors from './colors';
 
@@ -46,21 +44,20 @@ ${error.stack}`;
       return config.output.filename;
 
     // In PROD mode, read name of physical compiled file (because of hash)
-    const curDir = process.cwd();
-    shell.cd(config.output.path);
-    const output = shell.exec('ls -t client.*.js', { silent: true });
-    const bundleFiles = output.trim().split("\n");
-    const bundleFile = bundleFiles[0];
-    shell.cd(curDir);
-
-    if (bundleFile.code > 0) {
-      colorPrint("FgRed", "\nCouldn\'t find client bundle file:");
-      colorPrint("FgRed", bundleFile.stderr);
-      console.error("\nDid you run build script (\'npm run build\')?\n");
+    let bundleFile = null;
+    try {
+      const dir = `${config.output.path}/`;
+      const bundleFiles = fs.readdirSync(dir);
+      // Sort files in reverse chronological order (newest first)
+      bundleFiles.sort((a, b) => fs.statSync(dir + b).mtime.getTime() - fs.statSync(dir + a).mtime.getTime());
+      bundleFile = bundleFiles[0];
+      if (!bundleFile) throw new Error("Bundle file undefined");
+    } catch(e) {
+      colorPrint("FgRed", "\nCouldn\'t get client bundle file\n");
+      console.error(e);
+      colorPrint("FgRed", "\nDid you run build script (\'npm run build\')?\n");
       process.exit();
-      // throw new Error(bundleFile.stderr);
     }
-
     return bundleFile;
   }
 };
