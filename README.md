@@ -29,26 +29,21 @@ npm run start:dev
 
 ## Dependencies
 
-- [colors](https://ghub.io/colors): get colors in your node.js console
-- [cors](https://ghub.io/cors): Node.js CORS middleware
-- [express](https://ghub.io/express): Fast, unopinionated, minimalist web framework
-- [mongodb](https://ghub.io/mongodb): The official MongoDB driver for Node.js
-- [react](https://ghub.io/react): React is a JavaScript library for building user interfaces.
-- [react-dom](https://ghub.io/react-dom): React package for working with the DOM.
-- [socket.io](https://ghub.io/socket.io): node.js realtime framework server
-
-## Dev Dependencies
-
 - [@babel/core](https://ghub.io/@babel/core): Babel compiler core.
 - [@babel/preset-env](https://ghub.io/@babel/preset-env): A Babel preset for each environment.
 - [@babel/preset-react](https://ghub.io/@babel/preset-react): Babel preset for all React plugins.
 - [@babel/register](https://ghub.io/@babel/register): babel require hook
 - [babel-loader](https://ghub.io/babel-loader): babel module loader for webpack
+- [colors](https://ghub.io/colors): get colors in your node.js console
+- [cors](https://ghub.io/cors): Node.js CORS middleware
 - [cross-env](https://ghub.io/cross-env): Run scripts that set and use environment variables across platforms
 - [css-loader](https://ghub.io/css-loader): css loader module for webpack
-- [nodemon](https://ghub.io/nodemon): Simple monitor script for use during development of a node.js app.
+- [express](https://ghub.io/express): Fast, unopinionated, minimalist web framework
+- [mongodb](https://ghub.io/mongodb): The official MongoDB driver for Node.js
 - [open](https://ghub.io/open): Open stuff like URLs, files, executables. Cross-platform.
-- [shelljs](https://ghub.io/shelljs): Portable Unix shell commands for Node.js
+- [react](https://ghub.io/react): React is a JavaScript library for building user interfaces.
+- [react-dom](https://ghub.io/react-dom): React package for working with the DOM.
+- [socket.io](https://ghub.io/socket.io): node.js realtime framework server
 - [style-loader](https://ghub.io/style-loader): style loader module for webpack
 - [webpack](https://ghub.io/webpack): Packs CommonJs/AMD modules for the browser. Allows to split your codebase into multiple bundles, which can be loaded on demand. Support loaders to preprocess files, i.e. json, jsx, es7, css, less, ... and your custom stuff.
 - [webpack-cli](https://ghub.io/webpack-cli): CLI for webpack &amp; friends
@@ -56,9 +51,13 @@ npm run start:dev
 - [webpack-hot-middleware](https://ghub.io/webpack-hot-middleware): Webpack hot reloading you can attach to your own server
 - [webpack-node-externals](https://ghub.io/webpack-node-externals): Easily exclude node_modules in Webpack bundle
 
+## Dev Dependencies
+
+- [nodemon](https://ghub.io/nodemon): Simple monitor script for use during development of a node.js app.
+
 ## Prerequisites
 
-MongoDB Database installed with default settings (host: localhost, port=27017, dbpath=/data/db). Mongod engine/service version 3.2.
+MongoDB Database installed with default settings (host: localhost, port=27017, dbpath=/data/db) or access to an online cluster. Mongod engine/service version 3.2.
 
 ## Issues
 
