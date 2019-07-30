@@ -72,6 +72,8 @@ Webpack has a default setting to mock certain Node.js globals when compiling the
 
 More info in the [webpack documentation](https://webpack.js.org/configuration/node#node__filename).
 
+NODE_ENV: The installation should work as-is on all Linux-based and Mac environments, however in Windows it works differently. The NODE_ENV environment variable needs to be set to either 'development' or 'production' in the start and build scripts. For some reason, the "cross-env" module doesn't work, which is what I always use to set env variables for cross compatibility between different OS/platforms. Be sure to check this before running the app (Powershell: $env:NODE_ENV="development|production", CMD: set NODE_ENV=development|production).
+
 ## License
 
 ISC
